@@ -114,22 +114,32 @@ export default function PhotoBooth(): React.JSX.Element {
       )}
       <div className="flex">
         <div>
-          <video ref={videoRef} className="rounded-2xl shadow" autoPlay muted></video>
+          <div className="relative">
+            {countdown !== null && (
+              <div className=" absolute top-0 left-0 w-full h-full flex items-center justify-center">
+                <div className="bg-[#00000080] rounded-md px-4 py-2 text-2xl font-bold text-white">
+                  {countdown}
+                </div>
+              </div>
+            )}
+            <video ref={videoRef} className="rounded-2xl shadow border-3 border-[#BF9264]" autoPlay muted></video>
+          </div>
           <canvas ref={canvasRef} className="hidden" />
 
-            {countdown !== null && (
-              <div className="text-6xl font-bold text-center">{countdown}</div>
-            )}
-
-            <div className="flex gap-2">
-              <button onClick={takePhotos} disabled={isCapturing}>
-                Take Photo ({capturedImages.length}/4)
-              </button>
-              <button onClick={resetPhotos} disabled={capturedImages.length === 0}>
-                Reset
-              </button>
-              <button onClick={downloadCollage} disabled={capturedImages.length < 1}>Download All</button>
-            </div>
+          <div className="flex justify-center mt-3 gap-2">
+            <button className="bg-white border border-[#BF9264] text-[#BF9264] px-4 py-2 rounded-full hover:bg-[#BF9264] hover:text-white transition-all duration-300" onClick={takePhotos} disabled={isCapturing}>
+              Take Photo ({capturedImages.length}/4)
+            </button>
+            {capturedImages.length === 4 && (
+              <>
+                <button className="bg-white border border-[#BF9264] text-[#BF9264] px-4 py-2 rounded-full hover:bg-[#BF9264] hover:text-white transition-all duration-300" onClick={resetPhotos} disabled={capturedImages.length === 0}>
+                  Reset
+                </button>
+                <button className="bg-white border border-[#BF9264] text-[#BF9264] px-4 py-2 rounded-full hover:bg-[#BF9264] hover:text-white transition-all duration-300" onClick={downloadCollage} disabled={capturedImages.length < 1}>Download All</button>
+              </>
+            ) }
+            
+          </div>
         </div>
 
         {capturedImages.length > 0 && (
