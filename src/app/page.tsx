@@ -108,11 +108,11 @@ export default function PhotoBooth(): React.JSX.Element {
   };
 
   return (
-    <div className="p-4 grid gap-4 relative">
+    <div className="flex flex-col items-center justify-center h-screen">
       {showFlash && (
         <div className="absolute inset-0 bg-white opacity-80 animate-fadeOut pointer-events-none z-50"></div>
       )}
-      <div className="flex">
+      <div className="flex items-center justify-center">
         <div>
           <div className="relative">
             {countdown !== null && (
@@ -143,8 +143,8 @@ export default function PhotoBooth(): React.JSX.Element {
         </div>
 
         {capturedImages.length > 0 && (
-          <div>
-            <div className="grid grid-cols-1 gap-4 p-4">
+          <div className="border border-[#BF9264] rounded-2xl px-4 pt-4 pb-[100px] m-4">
+            <div className="grid grid-cols-1 gap-4">
               {capturedImages.map((img, index) => (
                 <div key={index} className="flex flex-col items-center gap-2">
                   <img
