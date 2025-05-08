@@ -1,5 +1,6 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
+import html2canvas from "html2canvas";
 
 export default function PhotoBooth(): React.JSX.Element {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -9,7 +10,7 @@ export default function PhotoBooth(): React.JSX.Element {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [isCapturing, setIsCapturing] = useState<boolean>(false);
   const [showFlash, setShowFlash] = useState<boolean>(false);
-
+  const [backgroundColor, setBackgroundColor] = useState<string>("#FFFFFF");
 
   useEffect(() => {
     if (countdown === null) return;
@@ -72,39 +73,19 @@ export default function PhotoBooth(): React.JSX.Element {
 
   const resetPhotos = () => {
     setCapturedImages([]);
+    setBackgroundColor("#FFFFFF");
   };
 
-  const downloadCollage = () => {
-    const canvas = collageRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const width = 600;
-    const height = 1600;
-    const imgHeight = height / 4;
-    canvas.width = width;
-    canvas.height = height;
-
-    const loadAndDraw = async () => {
-      for (let i = 0; i < capturedImages.length; i++) {
-        const img = new Image();
-        img.src = capturedImages[i];
-        await new Promise<void>((resolve) => {
-          img.onload = () => {
-            ctx.drawImage(img, 0, i * imgHeight, width, imgHeight);
-            resolve();
-          };
-        });
-      }
-      const a = document.createElement("a");
-      a.href = canvas.toDataURL("image/png");
-      a.download = "photo_strip.png";
-      a.click();
-    };
-
-    loadAndDraw();
+  const downloadDivAsImage = () => {
+    const divToCapture = document.getElementById("captureDiv");
+    if (divToCapture) {
+      html2canvas(divToCapture).then((canvas) => {
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = `photo_strip_${new Date().toISOString().split('T')[0]}.png`;
+        link.click();
+      });
+    }
   };
 
   return (
@@ -132,18 +113,36 @@ export default function PhotoBooth(): React.JSX.Element {
             </button>
             {capturedImages.length === 4 && (
               <>
-                <button className="bg-white border border-[#BF9264] text-[#BF9264] px-4 py-2 rounded-full hover:bg-[#BF9264] hover:text-white transition-all duration-300" onClick={resetPhotos} disabled={capturedImages.length === 0}>
+                <button className="bg-white border border-[#BF9264] text-[#BF9264] px-4 py-2 rounded-full hover:bg-[#BF9264] hover:text-white transition-all duration-300" onClick={resetPhotos}>
                   Reset
                 </button>
-                <button className="bg-white border border-[#BF9264] text-[#BF9264] px-4 py-2 rounded-full hover:bg-[#BF9264] hover:text-white transition-all duration-300" onClick={downloadCollage} disabled={capturedImages.length < 1}>Download All</button>
               </>
-            ) }
-            
+            )}
           </div>
+          {capturedImages.length === 4 && (
+            <div className="flex justify-center mt-3 items-center gap-2">
+              <div>
+                <label htmlFor="colorPicker" className="block text-sm font-medium text-gray-700">Choose Background Color:</label>
+                <input
+                  type="color"
+                  id="colorPicker"
+                  value={backgroundColor}
+                  onChange={(e) => setBackgroundColor(e.target.value)}
+                  className="mt-1 block w-full"
+                />
+              </div>
+              <button
+                className="bg-white border border-[#BF9264] text-[#BF9264] px-4 py-2 rounded-full hover:bg-[#BF9264] max-h-fit hover:text-white transition-all duration-300"
+                onClick={downloadDivAsImage}
+              >
+                Download Picture
+              </button>
+            </div>
+          )}
         </div>
 
         {capturedImages.length > 0 && (
-          <div className="border border-[#BF9264] rounded-2xl px-4 pt-4 pb-[100px] m-4">
+          <div id="captureDiv" className="border border-[#BF9264] rounded-2xl px-4 pt-4 pb-[100px] m-4" style={{ backgroundColor }}>
             <div className="grid grid-cols-1 gap-4">
               {capturedImages.map((img, index) => (
                 <div key={index} className="flex flex-col items-center gap-2">
@@ -159,7 +158,6 @@ export default function PhotoBooth(): React.JSX.Element {
           </div>
         )}
       </div>
-      <canvas ref={collageRef} className="hidden" />
     </div>
   );
 }
